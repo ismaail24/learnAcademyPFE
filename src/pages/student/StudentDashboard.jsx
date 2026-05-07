@@ -21,23 +21,29 @@ export default function StudentDashboard() {
     const announcements = getAnnouncements().filter(
       (a) => a.teacherCode === user.teacherCode,
     );
+
     const quizzes = getQuizzes().filter(
       (q) => q.teacherCode === user.teacherCode && q.level <= user.level,
     );
+
     const results = getResults().filter((r) => r.username === user.username);
+
     const quizResults = getQuizResults().filter(
       (r) => r.username === user.username,
     );
+
     const exercises = getExercises().filter(
       (e) =>
         (e.teacherCode === user.teacherCode || e.teacherCode === "DEFAULT") &&
         e.level <= user.level,
     );
+
     const courses = getCourses().filter(
       (c) =>
         (c.teacherCode === user.teacherCode || c.teacherCode === "DEFAULT") &&
         c.level <= user.level,
     );
+
     return {
       announcements: announcements.length,
       quizzes: quizzes.length,
@@ -75,69 +81,86 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       <StudentMobileNav />
+
       <div className="flex">
         <StudentSidebar />
-        <main className="flex-1 min-w-4xl mx-auto px-4 py-8">
-          {/* Welcome card */}
+
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          {/* Welcome Card */}
           <FunCard className="mb-8 animate-slide-up" hover={false}>
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl gradient-hero flex items-center justify-center text-4xl animate-float">
+            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
+              {/* Icon */}
+              <div className="w-20 h-20 rounded-2xl gradient-hero flex items-center justify-center text-4xl animate-float flex-shrink-0">
                 🧮
               </div>
-              <div className="text-center sm:text-left flex-1">
-                <h1 className="text-3xl font-display font-bold text-foreground">
+
+              {/* User Info */}
+              <div className="text-center lg:text-left flex-1">
+                <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
                   Hi, {user.username}! 🎉
                 </h1>
-                <div className="flex flex-wrap items-center gap-3 mt-2 justify-center sm:justify-start">
+
+                <div className="flex flex-wrap items-center gap-3 mt-3 justify-center lg:justify-start">
                   <LevelBadge
                     level={user.level}
                     current={user.level}
                     size="lg"
                   />
-                  <span className="text-muted-foreground">·</span>
+
+                  <span className="text-muted-foreground hidden sm:block">
+                    ·
+                  </span>
+
                   <span className="font-display font-bold text-secondary text-lg">
                     {user.score} pts
                   </span>
                 </div>
               </div>
+
+              {/* Button */}
               <Link
                 to="/student/exercises"
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl gradient-hero text-primary-foreground font-display font-semibold shadow-fun hover:shadow-hover hover:-translate-y-1 transition-all duration-300 text-lg"
+                className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-3 rounded-2xl gradient-hero text-primary-foreground font-display font-semibold shadow-fun hover:shadow-hover hover:-translate-y-1 transition-all duration-300 text-lg"
               >
-                <Rocket size={20} /> Start Learning!
+                <Rocket size={20} />
+                Start Learning!
               </Link>
             </div>
           </FunCard>
 
-          {/* Stats cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
             <StatCard
               icon="✏️"
               label="Exercises"
               value={stats.exercises}
               color="primary"
             />
+
             <StatCard
               icon="📚"
               label="Courses"
               value={stats.courses}
               color="secondary"
             />
+
             <StatCard
               icon="🧩"
               label="Quizzes"
               value={stats.quizzes}
               color="accent"
             />
+
             <StatCard
               icon="📢"
               label="Announcements"
               value={stats.announcements}
               color="purple"
             />
+
             <StatCard
               icon="📊"
               label="Results"
@@ -146,15 +169,16 @@ export default function StudentDashboard() {
             />
           </div>
 
-          {/* Level progress */}
+          {/* Levels */}
           <div
             className="mb-8 animate-slide-up"
             style={{ animationDelay: "0.1s" }}
           >
-            <h2 className="text-lg font-display font-bold text-foreground mb-3">
+            <h2 className="text-lg sm:text-xl font-display font-bold text-foreground mb-4">
               Your Levels
             </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2">
+
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {[1, 2, 3, 4].map((level) => (
                 <div key={level} className="flex-shrink-0">
                   <LevelBadge level={level} current={user.level} size="lg" />
@@ -163,8 +187,8 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          {/* Quick links */}
-          <div className="grid sm:grid-cols-3 gap-6">
+          {/* Quick Links */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {links.map((link, i) => (
               <Link
                 key={link.to}
@@ -178,9 +202,11 @@ export default function StudentDashboard() {
                   >
                     {link.emoji}
                   </div>
-                  <h3 className="font-display font-bold text-foreground text-lg mb-1">
+
+                  <h3 className="font-display font-bold text-foreground text-lg mb-2">
                     {link.label}
                   </h3>
+
                   <p className="text-sm text-muted-foreground">{link.desc}</p>
                 </FunCard>
               </Link>
