@@ -23,7 +23,9 @@ import StudentCourses from "./pages/student/StudentCourses";
 import StudentResults from "./pages/student/StudentResults";
 import StudentAnnouncements from "./pages/student/StudentAnnouncements";
 import StudentQuizzes from "./pages/student/StudentQuizzes";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
+import { NotificationsRunner } from "./components/NotificationsRunner";
 
 // Initialize localStorage with default data
 initializeStorage();
@@ -37,6 +39,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <NotificationsRunner />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -146,6 +149,16 @@ const App = () => (
               element={
                 <ProtectedRoute role="student">
                   <StudentResults />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Shared */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
                 </ProtectedRoute>
               }
             />
