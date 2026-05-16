@@ -42,7 +42,7 @@ export default function RegisterPage() {
             <div className="text-center mb-8">
               <span className="text-5xl block mb-3">✨</span>
               <h1 className="text-3xl font-display font-bold text-foreground">
-                Join LEARN ACADEMY!
+                Join IsmOu Academy!
               </h1>
               <p className="text-muted-foreground mt-2">
                 Create your account to start

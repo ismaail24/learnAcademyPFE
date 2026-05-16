@@ -243,7 +243,7 @@ export default function LandingPage() {
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                 <div className="ml-3 text-xs text-muted-foreground font-mono">
-                  smartmath.app/student
+              IsmOu Academy/student
                 </div>
               </div>
               <div className="p-6 sm:p-8 grid sm:grid-cols-5 gap-5 text-left">
@@ -539,7 +539,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🧮</span>
             <span className="font-display font-bold text-foreground">
-              SmartMath
+            IsmOu Academy
             </span>
             <span>© {new Date().getFullYear()}</span>
           </div>
