@@ -101,27 +101,6 @@ const steps = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Sarah M.",
-    role: "Primary Teacher",
-    text: "My students actually look forward to math class now. The quizzes are addictive!",
-    emoji: "👩‍🏫",
-  },
-  {
-    name: "Lucas, 9",
-    role: "Student",
-    text: "I unlocked level 3 yesterday! The badges are so cool.",
-    emoji: "🧒",
-  },
-  {
-    name: "David K.",
-    role: "School Director",
-    text: "Finally a tool that works offline in our rural school. Game changer.",
-    emoji: "🧑‍💼",
-  },
-];
-
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -243,7 +222,7 @@ export default function LandingPage() {
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                 <div className="ml-3 text-xs text-muted-foreground font-mono">
-              IsmOu Academy/student
+                  IsmOu Academy/student
                 </div>
               </div>
               <div className="p-6 sm:p-8 grid sm:grid-cols-5 gap-5 text-left">
@@ -277,7 +256,7 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">
-                          Hello Lucas!
+                          Hello ismaail!
                         </p>
                         <p className="text-[11px] text-muted-foreground">
                           Level 2 · Intermediate
@@ -460,50 +439,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-24 bg-muted/30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-display font-bold text-fun-pink uppercase tracking-[0.2em]">
-              Loved by
-            </span>
-            <h2 className="text-4xl sm:text-5xl font-display font-bold text-foreground mt-3 tracking-tight">
-              Teachers and kids agree.
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="bg-card rounded-3xl border border-border p-6 hover:shadow-hover transition-all"
-              >
-                <div className="flex gap-1 mb-3">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-amber-400 text-amber-400"
-                    />
-                  ))}
-                </div>
-                <p className="text-foreground leading-relaxed mb-5">
-                  "{t.text}"
-                </p>
-                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <div className="text-3xl">{t.emoji}</div>
-                  <div>
-                    <p className="font-bold text-foreground text-sm">
-                      {t.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -539,7 +474,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🧮</span>
             <span className="font-display font-bold text-foreground">
-            IsmOu Academy
+              IsmOu Academy
             </span>
             <span>© {new Date().getFullYear()}</span>
           </div>

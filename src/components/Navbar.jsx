@@ -22,13 +22,10 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border shadow-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  py-3">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-3xl group-hover:animate-wiggle">🧮</span>
-            <span className="text-2xl font-display font-bold bg-gradient-to-r from-primary to-fun-purple bg-clip-text text-transparent">
-              SmartMath
-            </span>
+            <img src="IsmOu_logo.png" className="h-[90px] w-auto" />
           </Link>
 
           {/* Desktop */}
