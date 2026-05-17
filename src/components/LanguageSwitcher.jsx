@@ -11,7 +11,6 @@ import {
 const OPTIONS = [
   { code: "en", flag: "🇬🇧", label: "English" },
   { code: "fr", flag: "🇫🇷", label: "Français" },
-  { code: "ar", flag: "🇸🇦", label: "العربية" },
 ];
 
 export function LanguageSwitcher() {
