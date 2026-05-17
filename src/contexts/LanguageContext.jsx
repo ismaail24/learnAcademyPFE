@@ -1,13 +1,16 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { DICT, translate } from "@/lib/translations";
+import {
+  fetchTranslation,
+  getCached,
+  withWhitespace,
+} from "@/lib/autoTranslate";
 
 const LanguageContext = createContext(undefined);
 
-// Attributes to translate
 const ATTRS = ["placeholder", "title", "aria-label", "alt"];
 
-// Ignore these tags
 const SKIP_TAGS = new Set([
   "SCRIPT",
   "STYLE",
@@ -17,7 +20,6 @@ const SKIP_TAGS = new Set([
   "TEXTAREA",
 ]);
 
-// Store original content
 const ORIGINAL_TEXT = new WeakMap();
 const ORIGINAL_ATTRS = new WeakMap();
 
@@ -25,7 +27,7 @@ function getOriginalText(node) {
   let original = ORIGINAL_TEXT.get(node);
 
   if (original === undefined) {
-    original = node.nodeValue || "";
+    original = node.nodeValue ?? "";
     ORIGINAL_TEXT.set(node, original);
   }
 
@@ -41,10 +43,24 @@ function getOriginalAttr(el, name) {
   }
 
   if (!(name in map)) {
-    map[name] = el.getAttribute(name) || "";
+    map[name] = el.getAttribute(name) ?? "";
   }
 
   return map[name];
+}
+
+const pendingTextNodes = new Map();
+const pendingAttrTargets = new Map();
+
+function schedulePending(map, key, value) {
+  let set = map.get(key);
+
+  if (!set) {
+    set = new Set();
+    map.set(key, set);
+  }
+
+  set.add(value);
 }
 
 function applyToTextNode(node, lang) {
@@ -56,16 +72,53 @@ function applyToTextNode(node, lang) {
     if (node.nodeValue !== original) {
       node.nodeValue = original;
     }
+    return;
+  }
+
+  const fromDict = translate(original, lang);
+
+  if (fromDict !== null) {
+    if (node.nodeValue !== fromDict) {
+      node.nodeValue = fromDict;
+    }
+    return;
+  }
+
+  const cached = getCached(original, lang);
+
+  if (cached) {
+    const next = withWhitespace(original, cached);
+
+    if (node.nodeValue !== next) {
+      node.nodeValue = next;
+    }
 
     return;
   }
 
-  const translated = translate(original, lang);
-  const next = translated || original;
+  const key = `${lang}::${original.trim()}`;
 
-  if (node.nodeValue !== next) {
-    node.nodeValue = next;
-  }
+  schedulePending(pendingTextNodes, key, node);
+
+  fetchTranslation(original, lang).then((res) => {
+    if (!res) return;
+
+    const targets = pendingTextNodes.get(key);
+
+    if (!targets) return;
+
+    pendingTextNodes.delete(key);
+
+    const next = withWhitespace(original, res);
+
+    targets.forEach((n) => {
+      if (n.isConnected && document.documentElement.lang === lang) {
+        if (n.nodeValue !== next) {
+          n.nodeValue = next;
+        }
+      }
+    });
+  });
 }
 
 function applyToElementAttrs(el, lang) {
@@ -82,27 +135,62 @@ function applyToElementAttrs(el, lang) {
       if (el.getAttribute(attr) !== original) {
         el.setAttribute(attr, original);
       }
+      continue;
+    }
+
+    const fromDict = translate(original, lang);
+
+    if (fromDict !== null) {
+      if (el.getAttribute(attr) !== fromDict) {
+        el.setAttribute(attr, fromDict);
+      }
+      continue;
+    }
+
+    const cached = getCached(original, lang);
+
+    if (cached) {
+      const next = withWhitespace(original, cached);
+
+      if (el.getAttribute(attr) !== next) {
+        el.setAttribute(attr, next);
+      }
 
       continue;
     }
 
-    const translated = translate(original, lang);
-    const next = translated || original;
+    const key = `${lang}::${original.trim()}`;
 
-    if (el.getAttribute(attr) !== next) {
-      el.setAttribute(attr, next);
-    }
+    schedulePending(pendingAttrTargets, key, { el, attr });
+
+    fetchTranslation(original, lang).then((res) => {
+      if (!res) return;
+
+      const targets = pendingAttrTargets.get(key);
+
+      if (!targets) return;
+
+      pendingAttrTargets.delete(key);
+
+      const next = withWhitespace(original, res);
+
+      targets.forEach(({ el: target, attr: a }) => {
+        if (target.isConnected && document.documentElement.lang === lang) {
+          if (target.getAttribute(a) !== next) {
+            target.setAttribute(a, next);
+          }
+        }
+      });
+    });
   }
 }
 
 function walkAndTranslate(root, lang) {
-  // Text node
   if (root.nodeType === Node.TEXT_NODE) {
     applyToTextNode(root, lang);
     return;
   }
 
-  // Ignore invalid nodes
   if (
     root.nodeType !== Node.ELEMENT_NODE &&
     root.nodeType !== Node.DOCUMENT_NODE
@@ -134,21 +222,20 @@ function walkAndTranslate(root, lang) {
     },
   );
 
-  // Translate root attrs
   if (root.nodeType === Node.ELEMENT_NODE && !SKIP_TAGS.has(root.tagName)) {
     applyToElementAttrs(root, lang);
   }
 
-  let current = walker.nextNode();
+  let cur = walker.nextNode();
 
-  while (current) {
-    if (current.nodeType === Node.ELEMENT_NODE) {
-      applyToElementAttrs(current, lang);
+  while (cur) {
+    if (cur.nodeType === Node.ELEMENT_NODE) {
+      applyToElementAttrs(cur, lang);
     } else {
-      applyToTextNode(current, lang);
+      applyToTextNode(cur, lang);
     }
 
-    current = walker.nextNode();
+    cur = walker.nextNode();
   }
 }
 
@@ -171,29 +258,24 @@ export function LanguageProvider({ children }) {
 
     localStorage.setItem("lang", lang);
 
-    // Initial translation
+    pendingTextNodes.clear();
+    pendingAttrTargets.clear();
+
     walkAndTranslate(document.body, lang);
 
-    // Observe DOM changes
     const observer = new MutationObserver((mutations) => {
       const currentLang = langRef.current;
 
-      for (const mutation of mutations) {
-        if (mutation.type === "characterData") {
-          applyToTextNode(mutation.target, currentLang);
-        }
-
-        if (mutation.type === "childList") {
-          mutation.addedNodes.forEach((node) => {
-            walkAndTranslate(node, currentLang);
-          });
-        }
-
-        if (
-          mutation.type === "attributes" &&
-          mutation.target.nodeType === Node.ELEMENT_NODE
+      for (const m of mutations) {
+        if (m.type === "characterData") {
+          applyToTextNode(m.target, currentLang);
+        } else if (m.type === "childList") {
+          m.addedNodes.forEach((n) => walkAndTranslate(n, currentLang));
+        } else if (
+          m.type === "attributes" &&
+          m.target.nodeType === Node.ELEMENT_NODE
         ) {
-          applyToElementAttrs(mutation.target, currentLang);
+          applyToElementAttrs(m.target, currentLang);
         }
       }
     });
@@ -203,43 +285,33 @@ export function LanguageProvider({ children }) {
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ATTRS,
+      attributeFilter: [...ATTRS],
     });
 
     return () => observer.disconnect();
   }, [lang]);
 
-  const setLang = (newLang) => {
-    setLangState(newLang);
-  };
+  const setLang = (l) => setLangState(l);
 
   const t = (key) => {
-    if (lang === "en") {
-      return key;
-    }
+    if (lang === "en") return key;
 
-    return DICT[key]?.[lang] || key;
+    return DICT[key]?.[lang] ?? key;
   };
 
   return (
-    <LanguageContext.Provider
-      value={{
-        lang,
-        setLang,
-        t,
-      }}
-    >
+    <LanguageContext.Provider value={{ lang, setLang, t }}>
       {children}
     </LanguageContext.Provider>
   );
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext);
+  const ctx = useContext(LanguageContext);
 
-  if (!context) {
+  if (!ctx) {
     throw new Error("useLanguage must be used within LanguageProvider");
   }
 
-  return context;
+  return ctx;
 }

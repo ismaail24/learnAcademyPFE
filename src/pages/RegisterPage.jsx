@@ -126,7 +126,6 @@ export default function RegisterPage() {
                 <div className="animate-slide-up">
                   <label className="block text-sm font-medium text-foreground mb-1.5">
                     Teacher Code{" "}
-                    <span className="text-muted-foreground">(optional)</span>
                   </label>
                   <input
                     type="text"
@@ -137,9 +136,6 @@ export default function RegisterPage() {
                     className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all"
                     placeholder="e.g. TC-ABC123"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Leave empty to use default content
-                  </p>
                 </div>
               )}
 
